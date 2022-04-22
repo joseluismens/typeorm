@@ -34,6 +34,12 @@ export  const signIn = async (req:Request, res:Response)=>{
     return res.status(200).json({token});
 
 }
+export  const profile = async (req:Request, res:Response)=>{
+    
+  
+    return res.status(200).json('profile');
+
+}
 
 
 
