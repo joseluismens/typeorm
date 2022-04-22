@@ -1,4 +1,4 @@
-import { NextFunction, Router } from "express";
+import { Router } from "express";
 import * as AuthController  from "../controllers/auth.controller";
 import { User } from "../entity/User";
 import { Response, Request } from "express";
