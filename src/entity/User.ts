@@ -8,9 +8,18 @@ export class User extends BaseEntity{
     id:number;
 
     @Column()
-    firstname: string;
+    email:string;
 
     @Column()
+    password:string;
+    @Column({
+        nullable:true
+    })
+    firstname: string;
+
+    @Column({
+        nullable:true
+    })
     lastname:string;
 
     @Column({
@@ -19,6 +28,8 @@ export class User extends BaseEntity{
 
     active:boolean;
 
+   
+    
     @CreateDateColumn()
     createdAt:Date;
 
