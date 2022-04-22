@@ -3,15 +3,21 @@ import { User } from "../entity/User";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
+import { signinValidation,signupValidation } from "../libs/joi";
 dotenv.config();
 
 export  const signUp = async (req:Request, res:Response)=>{
     
-    const {email,password} = req.body;
+    const {error} = signinValidation(req.body);
+    if (error) return res.status(400).json(error.message);
 
+    const {email,password} = req.body;
     const user = new User();
     user.email = email;
     user.password = password;
+
+
+    const emailExists= await User.findOne({email:email});
     await user.save();
 
 
@@ -32,7 +38,7 @@ export  const signIn = async (req:Request, res:Response)=>{
     try{
         const newUser:User = new User();
         newUser.email= email;
-        newUser.password=   await encrypPassword(password);
+        newUser.password=   await bcrypt.hash()
         
     }
 
