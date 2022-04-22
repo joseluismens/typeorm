@@ -1,6 +1,9 @@
 import { Response, Request } from "express";
 import { User } from "../entity/User";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
+dotenv.config();
 
 export  const signUp = async (req:Request, res:Response)=>{
     
@@ -25,7 +28,14 @@ export  const signIn = async (req:Request, res:Response)=>{
     const user = await User.findOne({where:{email:email}});
 
     if (!user) return res.status(401).send("the email doesn't exists");
-    if(user.password !==password) return res.status(401).send('wrong Password');
+
+    try{
+        const newUser:User = new User();
+        newUser.email= email;
+        newUser.password=   await encrypPassword(password);
+        
+    }
+
 
     const token = jwt.sign({id:user.id},'secretKey');
 
