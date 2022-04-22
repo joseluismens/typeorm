@@ -1,11 +1,18 @@
-import express from "express";
-import morgan from "morgan";
-import cors from "cors";
+import "reflect-metadata"
+import  app  from "./app";
+import { AppDataSource } from "./db";
 
-
-const app = express();
-app.use(morgan('dev'));
-app.use(cors());
-
-app.listen(3000);
-console.log('listening');
+async function main() {
+    try {
+        await AppDataSource.initialize();
+        console.log("database conected");
+        
+        app.listen(3000);
+        console.log(' server is listening on port ',3000);
+    } catch (error) {
+        console.error(error);
+        
+    }
+    
+}
+main();
