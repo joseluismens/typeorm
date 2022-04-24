@@ -1,61 +1,62 @@
-import { Response, Request } from "express";
+import { Request, Response } from "express";
+import * as jwt from "jsonwebtoken";
+import { validate } from "class-validator";
+
 import { User } from "../entity/User";
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-import bcrypt from "bcryptjs";
-import { signinValidation,signupValidation } from "../libs/joi";
-dotenv.config();
+import config from "../config/config";
 
-export  const signUp = async (req:Request, res:Response)=>{
-    
-    const {error} = signinValidation(req.body);
-    if (error) return res.status(400).json(error.message);
+export default class AuthController {
 
-    const {email,password} = req.body;
-    const user = new User();
-    user.email = email;
-    user.password = password;
+    static login = async (req: Request, res: Response) => {
+
+        const { username, password } = req.body;
+        if (!(username && password)) return res.status(400).send();
+
+        const user = await User.findOneBy({ username: username });
+        if (!user) return res.status(400).send({ message: "user not exists" });
+        //check password
+
+        if (!user.checkIfUnencryptedPasswordIsValid(password)) return res.status(400).send({ message: "incorrect password" });
+        const token = jwt.sign(
+            {
+                userId: user.id,
+                username: username
+            },
+            config.jwtSecret,
+            { expiresIn: '1h' }
+        );
+        res.header('auth-token', token).json(token);
 
 
-    const emailExists= await User.findOne({email:email});
-    await user.save();
-
-
-    const token = jwt.sign({id:user.id},'secretKey');
-    
-    
-    return res.status(200).json({token});
-
-}
-
-export  const signIn = async (req:Request, res:Response)=>{
-    
-    const {email,password} = req.body;
-    const user = await User.findOne({where:{email:email}});
-
-    if (!user) return res.status(401).send("the email doesn't exists");
-
-    try{
-        const newUser:User = new User();
-        newUser.email= email;
-        newUser.password=   await bcrypt.hash()
-        
     }
 
+    static changePassword = async (req: Request, res: Response) => {
 
-    const token = jwt.sign({id:user.id},'secretKey');
+        console.log(req.header('auth-token'));
+        
+        const id = res.locals.jwtPayload.userId;
+        const { oldPassword, newPassword } = req.body;
 
-    
-    
-    return res.status(200).json({token});
+        if (!(oldPassword && newPassword)) return res.status(400).send();
+        
+        const user = await User.findOneBy(id);
+
+        if (!user) return res.status(401).send();
+        if (!user.checkIfUnencryptedPasswordIsValid(oldPassword)) return res.status(401).send();
+
+        user.password = newPassword;
+        const errors = await validate(user);
+        
+        if (errors.length > 0) return res.status(400).send(errors);
+        
+        //Hash the new password and save
+        user.hashPassword();
+        User.update({id:id},user);
+
+        res.status(204).send();
+    };
+
+
+
 
 }
-export  const profile = async (req:Request, res:Response)=>{
-    
-  
-    return res.status(200).json('profile');
-
-}
-
-
-

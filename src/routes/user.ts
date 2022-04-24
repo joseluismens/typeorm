@@ -1,10 +1,11 @@
 import { Router } from "express";
-import * as UserController  from "../controllers/user.controller"
+import UserController  from "../controllers/user.controller"
+import { checkJwt } from "../middlewares/checkJwt";
 const router =  Router();
 
 router
-    .get('/users',UserController.getUsers)
-    .post('/users',UserController.createUser);
+    .get('/users', [checkJwt],UserController.listAll)
+    .post('/users',UserController.newUser);
 
 
 
