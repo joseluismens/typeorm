@@ -25,7 +25,7 @@ export default class AuthController {
             config.jwtSecret,
             { expiresIn: '1h' }
         );
-        res.header('auth-token', token).json(token);
+        res.header('auth-token', token).json({"token":token});
 
 
     }
