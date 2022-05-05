@@ -16,6 +16,22 @@ export default class ProductController{
         }
 
     }
+    static getProduct = async (req:Request,res:Response)=>{
+        try {
+            const {id} = req.params;
+            const product = await Product.findOneBy({id:parseInt(id)});
+            if (!product) return res.status(200).json({message:"Product not found"});
+            return res.json({product:product});
+        } catch (error) {
+            if (error instanceof Error) {
+                return res.status(500).json({ message: error.message });
+              }
+        }
+    }
+
+    static newProduct = async ()=>{
+        
+    }
 
 
 }
