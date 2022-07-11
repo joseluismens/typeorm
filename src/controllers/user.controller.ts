@@ -33,16 +33,16 @@ export default class UserController {
   };
   static newUser = async (req: Request, res: Response) => {
 
-    const { username, password, role } = req.body;
+    const { nombre,username, password } = req.body;
     const user = new User();
-
+    user.nombre = nombre;
     user.username = username;
     user.password = password;
-    user.role = role;
+    user.role = 'default';
     console.log(user);
 
     const verifyUsername = await User.findOneBy({ username: username });
-    if (verifyUsername) return res.status(400).send({ message: "el usuario ya existe" });
+    if (verifyUsername) return res.status(500).send({ message: "El nombre de usuario ya ha sido utilizado" });
     const errors = await validate(user);
 
     if (errors.length > 0) return res.status(400).send(errors);
@@ -50,8 +50,8 @@ export default class UserController {
     user.hashPassword();
 
     await user.save();
+  
     console.log(user);
-
     return res.json(user);
 
   }
@@ -59,11 +59,12 @@ export default class UserController {
 
   static updateUser = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { username, role } = req.body;
+    const { nombre , username, role } = req.body;
 
     try {
       const user = await User.findOneBy({ id: parseInt(id) });
       if (!user) return res.status(404).json({ message: "Not user found" });
+      user.nombre = nombre;
 
       user.username = username;
       user.role = role;

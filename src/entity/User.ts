@@ -20,6 +20,10 @@ export class User extends BaseEntity {
 
     @Column()
     @Length(4,20)
+    nombre: string;
+
+    @Column()
+    @Length(4,20)
     username: string;
 
     @Column()

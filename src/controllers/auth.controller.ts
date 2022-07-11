@@ -10,13 +10,13 @@ export default class AuthController {
     static login = async (req: Request, res: Response) => {
 
         const { username, password } = req.body;
-        if (!(username && password)) return res.status(400).send();
+        if (!(username && password)) return res.status(500).send({message:'error'});
 
         const user = await User.findOneBy({ username: username });
-        if (!user) return res.status(400).send({ message: "user not exists" });
+        if (!user) return res.status(500).send({ message: "Este usuario no esta registrado en nuestro sistema" });
         //check password
 
-        if (!user.checkIfUnencryptedPasswordIsValid(password)) return res.status(400).send({ message: "incorrect password" });
+        if (!user.checkIfUnencryptedPasswordIsValid(password)) return res.status(500).send({ message: "La contraseña es incorrecta" });
         const token = jwt.sign(
             {
                 userId: user.id,
@@ -25,8 +25,7 @@ export default class AuthController {
             config.jwtSecret,
             { expiresIn: '1h' }
         );
-        res.header('auth-token', token).json({"token":token});
-
+        res.header('auth-token', token).json({id:user.id,username:user.username,token:token});
 
     }
 
